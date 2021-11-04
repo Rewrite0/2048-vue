@@ -1,7 +1,5 @@
 <template>
-<div id="app">
   <home />
-</div>
 </template>
 
 <script>
@@ -14,6 +12,9 @@ export default {
 </script>
 
 <style lang="scss">
+*{
+  box-sizing: border-box;
+}
 html, body{
   width: 100vw;
   overflow-x: hidden;
