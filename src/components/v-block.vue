@@ -1,5 +1,5 @@
 <template>
-<div class="v-block" :style="{background: getColor, color: num > 4 ? '#fff' : '#776e65'}">{{num}}</div>
+<div class="v-block" :style="blockStyle">{{num}}</div>
 </template>
 
 <script>
@@ -29,8 +29,16 @@ export default {
 		}
 	},
 	computed: {
-		getColor(){
-			return this.color[this.num];
+		blockStyle(){
+			const bg = this.num <= 8192 ? this.color[this.num] : '#000';
+			const color = this.num > 4 ? '#fff' : '';
+			const fs = this.num > 8192 ? '22px' : '';
+			const style = {
+				background: bg,
+				color: color,
+				fontSize: fs,
+			}
+			return style;
 		}
 	}
 }
@@ -44,6 +52,7 @@ export default {
 	border-radius: 5px;
 	font-size: 32px;
 	font-weight: bold;
+	color: #776e65;
 	line-height: $size;
 	display: flex;
 	align-content: center;

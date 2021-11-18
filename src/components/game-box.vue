@@ -8,7 +8,7 @@
 
 	<div class="game-over" v-if="gameOver">
 		<h1>Game Over!</h1>
-		<h2 @click.stop="reStart">再来一次</h2>
+		<h3 @click.stop="reStart">再来一次</h3>
 	</div>
 
 </div>
@@ -55,6 +55,7 @@ export default {
 		left: 0;
 		width: 100%;
 		height: 100%;
+		z-index: 1;
 	}
 
 	.game-over{
@@ -68,9 +69,9 @@ export default {
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		background: rgba($color: #fff, $alpha: 0.3);
+		background: rgba($color: #fff, $alpha: 0.8);
 
-		h2{
+		h3{
 			background: #8f7a66;
 			color: #fff;
 			padding: 5px 15px;
