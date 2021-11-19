@@ -5,7 +5,7 @@
 	<div class="msg-box">
 		<div class="game-name">2048-vue</div>
 		<!-- 新游戏按钮 -->
-		<div class="new-game" @click="gameReStart">New Game</div>
+		<div class="new-game" @click="init">New Game</div>
 		<!-- 分数 -->
 		<div class="score">分数: {{score}}</div>
 	</div>
@@ -13,7 +13,7 @@
 
 	<!-- S 游戏容器 -->
 	<game-box :gameOver="gameOver"
-						@reStart="init()">
+						@reStart="init">
 		<transition-group name="appear">
 
 			<div
@@ -50,14 +50,14 @@ export default {
 	},
 	methods: {
 		init() {	// 初始化
-			this.blocks.length = 0;
+			this.blocks = [];
 			this.score = 0;
 			this.auxId = 0;
 			this.gameOver = false;
 			this.createBlock();
 			this.createBlock();
 		},
-		keyBindings(){	// 案件绑定
+		keyBindings(){	// 按键绑定
 			document.addEventListener('keyup', (event) => {
 				if (!this.canMove) {
 					return;
@@ -87,41 +87,46 @@ export default {
 				return false;
 			}
 
-			let block = {	// block参数
-				x: this.randomCoordinates(),	// x坐标
-				y: this.randomCoordinates(),	// y坐标
-				num: this.randomNum(),				// block值
-				id: this.auxId++							// block id
+			// 随机2或4
+			const randomNum = Math.floor( Math.random() * 10 ) < 8 ? 2 : 4;
+			// 随机坐标 [0, 3]
+			const randomCoordinates = () => Math.floor( Math.random() * 4 );
+
+			const block = {	// block参数
+				x: randomCoordinates(),
+				y: randomCoordinates(),
+				num: randomNum,
+				id: this.auxId++,	// block唯一id
 			}
 
 			while( this.getBlock({x: block.x, y: block.y}) ){ // 去重
-				block.x = this.randomCoordinates();
-				block.y = this.randomCoordinates();
+				block.x = randomCoordinates();
+				block.y = randomCoordinates();
 			}
 
-			this.blocks.push(block);
+			// 使用promise确保创建后能获取到dom
+			const create = el => {
+				return new Promise( resolve => {
+					this.blocks.push(el);
+					resolve(true)
+				})
+			}
+			create(block).then(() => {
+				let dom = document.querySelector(`#b${block.id}`)
+				this.animateCreate(dom)
+			})
 		},
 		getBlock({ x, y }) { // 根据坐标返回block
 			return this.blocks.find( block => block.x === x && block.y === y);
 		},
-		randomNum(){	// 随机生成2或4, 2的概率为70%
-			return Math.floor(Math.random() * 10) < 7 ? 2 : 4
-		},
-		randomCoordinates(){	// 随机坐标, [0, 3]
-			return Math.floor(Math.random() * 4)
-		},
-		getTop(el) {	// 辅助获取定位top
-			return `${10 + el.y * 90}px`;
-		},
-		getLeft(el) {	// 辅助获取定位left
-			return `${10 + el.x * 90}px`;
-		},
 		blockPosition(block){	// 定位block
-			let style = {
+			const top = `${10 + block.y * 90}px`;
+			const left = `${10 + block.x * 90}px`;
+			const style = {
 				position: 'absolute',
 				zIndex: block.num,
-				top: this.getTop(block),
-				left: this.getLeft(block)
+				top,
+				left,
 			}
 			return style;
 		},
@@ -150,74 +155,85 @@ export default {
 					break;
 			}
 
-			// 代表移动完成的变量
+			// 表示移动完成
 			let moveEnd = false;
-			// 筛选行/列
-			for(let i = 0; i < 4; i++){ 
+			for(let i = 0; i < 4; i++){	// 筛选出每行/列进行操作
 				let group = this.blocks
 										.filter( block => block[param.group] === i)
 										.sort((a, b) => this.groupSort(param.end, a[param.coordinate], b[param.coordinate]));
 
-				// 表示合并过的变量
-				let visited = false;
-				// 获取新数组中的每个block进行操作
-				for(let n = 0; n < group.length; n++){
+				// 表示上一次已经合并
+				let merge = false;
+				for(let n = 0; n < group.length; n++){	// 对每个block进行操作
+					// 当前操作的blcok
+					let block = group[n];	
+					// 当前block前面的blcok
+					let prevBlock = group[n-1];
 
-					if(n === 0){ // 判断数组中的第一个block
-							// 如果这个block不在移动方向的顶点,则将其移动到顶点
-						if( group[n][param.coordinate] !== param.end ){
-							group[n][param.coordinate] = param.end;
-							moveEnd = true;
-						}
-					}else{ // 数组中的其余block
-							// 如果该block数值与前一个相等
-						if( group[n].num === group[n-1].num && !visited){
-							// 将该block移动到前一个block下
-							group[n][param.coordinate] = group[n-1][param.coordinate];
-							// 合并时禁止键盘输入
-							this.canMove = false;
-							// 获取该block的dom
-							let dom1 = document.querySelector(`#b${group[n].id}`);
-							// 监听该block的移动动画结束
-							dom1.addEventListener('transitionend', () => {
-								// 将当前block数值*2,获得两block合并的新数值
-								let newNum = group[n-1].num * 2;
-								// 将新数值赋给前一个block
-								group[n-1].num = newNum;
-								// 获取前一个block的dom
-								let dom2 = document.querySelector(`#b${group[n-1].id}`);
-								// 让前一个block展示合并动画
-								this.animateMerge(dom2);
-								// 移除当前block
-								this.blocks.splice(this.getIndexById(group[n].id), 1);
-								group.splice(n,1);
-								n--;
-								this.score += newNum;
-							})
-							moveEnd = true;
-							visited = true;
-						}else{ // 如果该block与前一个不相等,将其移到前一个block的后方
-							if(param.end === 0){
-								if(group[n][param.coordinate] !== group[n-1][param.coordinate] + 1){
-									group[n][param.coordinate] = group[n-1][param.coordinate] + 1;
-									moveEnd = true;
-									visited = false;
-								}
-							}else{
-								if(group[n][param.coordinate] !== group[n-1][param.coordinate] - 1){
-									group[n][param.coordinate] = group[n-1][param.coordinate] - 1;
-									moveEnd = true;
-									visited = false;
+					switch(n){
+						case 0:	// 移动第一个block
+							if(block[param.coordinate] !== param.end){	// 不在移动终点时移动到终点
+								block[param.coordinate] = param.end;
+								moveEnd = true;
+							}
+							break;
+						default:	// 移动后面的blck
+							if(block.num === prevBlock.num && !merge){	// 当前block等于前一个并且之前没有发生合并
+								// 将当前block移至前一个block下
+								block[param.coordinate] = prevBlock[param.coordinate];
+								// 合并时禁止键盘输入
+								this.canMove = false;
+								// 获取当前block的dom
+								const dom1 = document.querySelector(`#b${block.id}`);
+								const dom2 = document.querySelector(`#b${prevBlock.id}`);
+								dom1.addEventListener('transitionend', () => {
+									// 更新数值和分数
+									this.score += prevBlock.num *= 2;
+									// 展示合并动画
+									this.animateMerge(dom2);
+									// 移除block
+									this.blocks.splice(this.getIndexById(block.id), 1);
+									group.splice(n, 1);
+									n--;
+								})
+								moveEnd = true;
+								merge = true;
+							}else{	// 数值不等或前面已经发生了合并
+								if(param.end === 0){
+									if(block[param.coordinate] !== group[n-1][param.coordinate] + 1){
+										block[param.coordinate] = prevBlock[param.coordinate] + 1
+										moveEnd = true;
+										merge = false;
+									}
+								}else{
+									if(block[param.coordinate] !== group[n-1][param.coordinate] - 1){
+										block[param.coordinate] = prevBlock[param.coordinate] - 1
+										moveEnd = true;
+										merge = false;
+									}
 								}
 							}
-						}
+							break;
 					}
 				}
+
 			}
-			if(moveEnd){
-				this.createBlock();
-			}
+
+			// 移动完成创建新block
+			if(moveEnd) this.createBlock();
+			// 判断游戏结束
 			this.gameOver = this.isGameOver();
+		},
+		animateCreate(dom) { // 创建动画
+			dom.animate(
+				[
+					{ transform: 'scale(0)' },
+					{ transform: 'scale(1)' },
+				],
+				{
+					duration: 200,
+				}
+			);
 		},
 		animateMerge(dom) { // 合并动画
 			dom.animate(
@@ -233,7 +249,7 @@ export default {
 			this.canMove = true;
 		},
 		getIndexById(id) {
-			return this.blocks.findIndex((block) => block.id === id);
+			return this.blocks.findIndex( block => block.id === id);
 		},
 		isGameOver(){	// 判断游戏结束
 			if(this.isFull){
