@@ -24,7 +24,7 @@ html, body{
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   width: 100vw;
-  height: 100vh;
+  min-height: 80vh;
   overflow: hidden;
   user-select: none;
 }

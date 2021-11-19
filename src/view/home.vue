@@ -1,5 +1,9 @@
 <template>
-<div class="container">
+<div class="container"
+			v-touch:swipe.top="moveUp"
+			v-touch:swipe.bottom="moveDown"
+			v-touch:swipe.left="moveLeft"
+			v-touch:swipe.right="moveRight">
 
 	<!-- S 游戏信息 -->
 	<div class="msg-box">
@@ -42,6 +46,9 @@ export default {
 			auxId: 0,	// 辅助创建每个block的唯一id
 			canMove: true,	// 判断是否可以移动
 			gameOver: false,
+			startTime: 0,
+			startX: '',
+			startY: '',
 		}
 	},
 	mounted() {
@@ -277,6 +284,18 @@ export default {
 			}else{
 				return false;
 			}
+		},
+		moveUp(){
+			this.move('up');
+		},
+		moveDown(){
+			this.move('down')
+		},
+		moveLeft(){
+			this.move('left')
+		},
+		moveRight(){
+			this.move('right')
 		}
 	},
 	computed: {
@@ -297,6 +316,8 @@ $transitionTime: 0.2s; // 动画时长
 
 .container{
 	margin: 0 auto;
+	width: 100%;
+	height: 100%;
 
 	.msg-box{
 		padding-top: 10vw;
