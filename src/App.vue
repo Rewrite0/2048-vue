@@ -20,6 +20,8 @@ html, body{
   overflow-x: hidden;
   margin: 0;
   padding: 0;
+  // 禁止移动端下拉刷新
+  overscroll-behavior-y: contain;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
