@@ -11,6 +11,10 @@
 		<h3 @click.stop="reStart">再来一次</h3>
 	</div>
 
+	<div class="game-save" :class="{tips: saveTips}">
+		<h1>进度已保存</h1>
+	</div>
+
 </div>
 </template>
 
@@ -20,12 +24,16 @@ export default {
 		gameOver: {
 			type: Boolean,
 			default: false
+		},
+		saveTips: {
+			type: Boolean,
+			default: false
 		}
 	},
 	methods: {
 		reStart(){
 			this.$emit('reStart');
-		}
+		},
 	}
 }
 </script>
@@ -79,5 +87,24 @@ export default {
 			cursor: pointer;
 		}
 	}
+
+	.game-save{
+		position: absolute;
+		z-index: 999;
+		width: 100%;
+		height: 100%;
+		background: rgba($color: #fff, $alpha: 0.8);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: opacity 0.5s;
+		opacity: 0;
+
+		&.tips{
+			opacity: 1;
+		}
+
+	}
+
 }
 </style>
