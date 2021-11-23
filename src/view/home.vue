@@ -63,6 +63,7 @@ export default {
       this.score = 0;
       this.auxId = 0;
       this.gameOver = false;
+      this.saveTips = false;
       this.createBlock();
       this.createBlock();
     },
