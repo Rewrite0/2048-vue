@@ -47,9 +47,6 @@ export default {
       auxId: 0, // 辅助创建每个block的唯一id
       canMove: true, // 判断是否可以移动
       gameOver: false,
-      startTime: 0,
-      startX: "",
-      startY: "",
 			timer: null,
 			saveTips: false,
     };
