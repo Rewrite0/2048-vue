@@ -1,15 +1,13 @@
 <script setup>
-import { useStore } from '@/store';
-import { storeToRefs } from 'pinia';
-
-const store = useStore();
-const { saveTips } = storeToRefs(store);
-
 const props = defineProps({
 	gameOver: {
 		type: Boolean,
 		default: false
 	},
+	saveTips: {
+		type: Boolean,
+		default: false
+	}
 })
 
 const emit = defineEmits(['reStart']);

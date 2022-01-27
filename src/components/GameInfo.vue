@@ -1,14 +1,9 @@
 <script setup>
-import { useStore } from '@/store';
-import { storeToRefs } from 'pinia';
-
-const store = useStore();
-const { score } = storeToRefs(store);
-
 const props = defineProps({
 	name: String,
 	btnName: String,
-	tips: String
+	tips: String,
+  score: Number,
 })
 
 const emit = defineEmits(['init'])

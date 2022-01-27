@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, toRefs } from 'vue';
 import GameInfo from '@/components/GameInfo.vue';
 import GameBox from '@/components/GameBox.vue';
 import VBlock from '@/components/VBlock.vue';
@@ -8,9 +8,10 @@ import useKeyBindings from '@/hooks/useKeyBindings.js';
 import useSaveLoad from '@/hooks/useSaveLoad.js';
 
 const store = useStore();
+const { saveTips, gameOver, score } = toRefs(store);
+
 const { load, init } = useSaveLoad(store);
 const { keyBindings, moveUp, moveDown, moveLeft, moveRight } = useKeyBindings(store);
-
 
 store.isFull = computed(() => store.blocks.length > 15);
 
@@ -32,6 +33,7 @@ onMounted(() => {
     v-touch:swipe.right="moveRight"
   >
     <GameInfo
+      :score="score"
       name="2048-vue"
       btnName="New Game"
       tips="Tips: 游戏进度将在最后一次操作后5s保存"
@@ -39,7 +41,8 @@ onMounted(() => {
     />
 
     <GameBox
-      :gameOver="store.gameOver"
+      :gameOver="gameOver"
+      :saveTips="saveTips"
       @reStart="init"
     >
       <transition-group name="appear">
