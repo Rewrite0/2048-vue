@@ -15,7 +15,6 @@ export default function useKeyBindings(store) {
       if (!store.canMove) {
         return;
       }
-      store.saveTips = false;
       switch (event.key.toLocaleUpperCase()) {
         case "ARROWUP":
         case "W":

@@ -58,6 +58,7 @@ export default function useBlockMove(store) {
 	}
 
 	const blockMove = (dir) => {
+		if(store.saveTips) store.saveTips = false;
 		const param = getDir(dir);
 
 		// 表示移动完成
